@@ -1,128 +1,106 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Layout from "./components/layout/Layout";
+import Home from "./pages/Home";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
-import Teams from "./pages/teams";
 import Players from "./pages/players";
 import PlayerProfile from "./pages/playerProfile";
+import ScoutDashboard from "./pages/ScoutDashboard";
+import EditProfile from "./pages/EditProfile";
 import Matches from "./pages/matches";
-import Scouts from "./pages/scouts";
-import ScoutReports from "./pages/scoutReports";
-import Analytics from "./pages/analytics";
-import KosovoLive from "./pages/kosovoLive";
-import ProtectedRoute from "./components/protectedRoute";
-import Layout from "./components/layout";
+import Market from "./pages/market";
+import Clubs from "./pages/clubs";
+import Reports from "./pages/reports";
+import Summary from "./pages/summary";
+import Shortlist from "./pages/shortlist";
+import Presentation from "./pages/presentation";
+import WarRoom from "./pages/warRoom";
+import About from "./pages/About";
+import NotFound from "./pages/NotFound";
 
-function HomeRedirect() {
-  const token = localStorage.getItem("football_token");
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
 
-  return <Navigate to={token ? "/dashboard" : "/login"} replace />;
-}
+  if (loading) {
+    return null;
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomeRedirect />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <AuthProvider>
+      <Router>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: "#1e293b",
+              color: "#fff",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "12px",
+              padding: "16px"
+            },
+            success: {
+              iconTheme: { primary: "#22c55e", secondary: "#fff" }
+            },
+            error: {
+              iconTheme: { primary: "#ef4444", secondary: "#fff" }
+            }
+          }}
+        />
 
-      <Route
-        path="/kosovo-live"
-        element={
-          <Layout>
-            <KosovoLive />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/teams"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Teams />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/players"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Players />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/players/:id"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <PlayerProfile />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/matches"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Matches />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/scouts"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Scouts />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/scout-reports"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <ScoutReports />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/analytics"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Analytics />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/players" element={<Players />} />
+            <Route path="/player/:id" element={<PlayerProfile />} />
+            <Route path="/market" element={<Market />} />
+            <Route path="/clubs" element={<Clubs />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/summary" element={<Summary />} />
+            <Route path="/shortlist" element={<Shortlist />} />
+            <Route path="/presentation" element={<Presentation />} />
+            <Route path="/war-room" element={<WarRoom />} />
+            <Route
+              path="/scout"
+              element={
+                <ProtectedRoute>
+                  <ScoutDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/edit-profile"
+              element={
+                <ProtectedRoute>
+                  <EditProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/matches" element={<Matches />} />
+            <Route path="/about" element={<About />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </AuthProvider>
   );
 }
 

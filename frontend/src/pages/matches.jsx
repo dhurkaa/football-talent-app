@@ -1,280 +1,110 @@
-import { useEffect, useState } from "react";
-import api from "../api/api";
+import React, { useEffect, useMemo, useState } from "react";
+import { HiLocationMarker, HiPlay, HiUserGroup } from "react-icons/hi";
+import Card from "../components/common/Card";
+import Loading from "../components/common/Loading";
+import { matchAPI } from "../services/api";
 
-const emptyForm = {
-  homeTeamId: "",
-  awayTeamId: "",
-  matchDate: "",
-  stadium: "",
-  scoreHome: "",
-  scoreAway: "",
-  status: "scheduled",
-};
-
-function Matches() {
+const Matches = () => {
   const [matches, setMatches] = useState([]);
-  const [teams, setTeams] = useState([]);
-  const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState(null);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  const loadData = async () => {
-    try {
-      const [matchesRes, teamsRes] = await Promise.all([
-        api.get("/matches"),
-        api.get("/teams"),
-      ]);
-
-      setMatches(matchesRes.data);
-      setTeams(teamsRes.data);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load matches");
-    }
-  };
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
+    const fetchMatches = async () => {
+      const response = await matchAPI.getAll();
+      setMatches(response.data);
+      setLoading(false);
+    };
+
+    fetchMatches();
   }, []);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const summary = useMemo(() => {
+    const liveCount = matches.filter((match) => match.status === "Live").length;
+    const totalScouts = matches.reduce((sum, match) => sum + (match.scouts || 0), 0);
+    return {
+      liveCount,
+      totalScouts,
+      featuredProspects: matches.reduce((sum, match) => sum + ((match.featuredProspects || []).length || 0), 0)
+    };
+  }, [matches]);
 
-  const resetForm = () => {
-    setForm(emptyForm);
-    setEditingId(null);
-  };
-
-  const buildPayload = () => ({
-    homeTeamId: form.homeTeamId,
-    awayTeamId: form.awayTeamId,
-    matchDate: form.matchDate,
-    stadium: form.stadium,
-    scoreHome: Number(form.scoreHome || 0),
-    scoreAway: Number(form.scoreAway || 0),
-    status: form.status,
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setError("");
-
-    if (form.homeTeamId === form.awayTeamId) {
-      setError("Home team and away team cannot be the same.");
-      return;
-    }
-
-    try {
-      if (editingId) {
-        await api.put(`/matches/${editingId}`, buildPayload());
-        setMessage("Match updated successfully.");
-      } else {
-        await api.post("/matches", buildPayload());
-        setMessage("Match created successfully.");
-      }
-
-      resetForm();
-      loadData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Action failed");
-    }
-  };
-
-  const handleEdit = (match) => {
-    setEditingId(match._id);
-
-    setForm({
-      homeTeamId: match.homeTeamId?._id || match.homeTeamId || "",
-      awayTeamId: match.awayTeamId?._id || match.awayTeamId || "",
-      matchDate: match.matchDate ? match.matchDate.slice(0, 10) : "",
-      stadium: match.stadium || "",
-      scoreHome: match.scoreHome ?? "",
-      scoreAway: match.scoreAway ?? "",
-      status: match.status || "scheduled",
-    });
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirm("Delete this match?")) return;
-
-    try {
-      await api.delete(`/matches/${id}`);
-      setMessage("Match deleted successfully.");
-      loadData();
-    } catch (err) {
-      setError(err.response?.data?.message || "Delete failed");
-    }
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "-";
-    return new Date(date).toLocaleDateString();
-  };
+  if (loading) {
+    return <Loading text="Loading matches..." />;
+  }
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <div>
-          <span className="section-label">CRUD + References</span>
-          <h1>Matches</h1>
-          <p>
-            Manage football matches by connecting home and away teams through
-            MongoDB ObjectId references.
-          </p>
+    <div className="min-h-screen py-8">
+      <div className="page-container">
+        <div className="mb-8">
+          <h1 className="font-display text-4xl font-bold text-white">
+            Match <span className="gradient-text">Center</span>
+          </h1>
+          <p className="mt-2 text-dark-400">Track upcoming fixtures, live scouting coverage, and where attention is clustering.</p>
         </div>
-      </div>
 
-      {message && <div className="success-box">{message}</div>}
-      {error && <div className="error-box">{error}</div>}
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          {[
+            { label: "Live fixtures", value: summary.liveCount },
+            { label: "Scouts assigned", value: summary.totalScouts },
+            { label: "Featured prospects", value: summary.featuredProspects }
+          ].map((item) => (
+            <div key={item.label} className="glass-card p-5">
+              <p className="text-sm text-dark-400">{item.label}</p>
+              <p className="mt-2 text-3xl font-bold text-white">{item.value}</p>
+            </div>
+          ))}
+        </div>
 
-      <div className="crud-grid">
-        <form className="panel form-panel" onSubmit={handleSubmit}>
-          <h2>{editingId ? "Edit Match" : "Add Match"}</h2>
-
-          <select
-            name="homeTeamId"
-            value={form.homeTeamId}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select home team</option>
-            {teams.map((team) => (
-              <option key={team._id} value={team._id}>
-                {team.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="awayTeamId"
-            value={form.awayTeamId}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select away team</option>
-            {teams.map((team) => (
-              <option key={team._id} value={team._id}>
-                {team.name}
-              </option>
-            ))}
-          </select>
-
-          <input
-            name="matchDate"
-            type="date"
-            value={form.matchDate}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            name="stadium"
-            placeholder="Stadium"
-            value={form.stadium}
-            onChange={handleChange}
-            required
-          />
-
-          <div className="mini-grid">
-            <input
-              name="scoreHome"
-              type="number"
-              placeholder="Home score"
-              value={form.scoreHome}
-              onChange={handleChange}
-            />
-
-            <input
-              name="scoreAway"
-              type="number"
-              placeholder="Away score"
-              value={form.scoreAway}
-              onChange={handleChange}
-            />
-          </div>
-
-          <select name="status" value={form.status} onChange={handleChange}>
-            <option value="scheduled">Scheduled</option>
-            <option value="played">Played</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-
-          <div className="form-actions">
-            <button type="submit">
-              {editingId ? "Update Match" : "Create Match"}
-            </button>
-
-            {editingId && (
-              <button type="button" className="secondary-btn" onClick={resetForm}>
-                Cancel
-              </button>
-            )}
-          </div>
-        </form>
-
-        <div className="panel table-panel">
-          <h2>Match List</h2>
-
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Home</th>
-                  <th>Away</th>
-                  <th>Score</th>
-                  <th>Status</th>
-                  <th>Stadium</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {matches.map((match) => (
-                  <tr key={match._id}>
-                    <td>{formatDate(match.matchDate)}</td>
-                    <td>{match.homeTeamId?.name || "Unknown"}</td>
-                    <td>{match.awayTeamId?.name || "Unknown"}</td>
-                    <td>
-                      {match.scoreHome} - {match.scoreAway}
-                    </td>
-                    <td>
-                      <span className={`status-pill ${match.status}`}>
-                        {match.status}
-                      </span>
-                    </td>
-                    <td>{match.stadium}</td>
-                    <td className="actions">
-                      <button onClick={() => handleEdit(match)}>Edit</button>
-                      <button
-                        className="danger-btn"
-                        onClick={() => handleDelete(match._id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-
-                {matches.length === 0 && (
-                  <tr>
-                    <td colSpan="7" className="empty-cell">
-                      No matches found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="grid grid-cols-1 gap-6">
+          {matches.map((match) => (
+            <Card key={match.id} className="p-6">
+              <div className="grid gap-6 lg:grid-cols-[1fr_auto_auto] lg:items-center">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full bg-primary-500/10 px-3 py-1 text-xs font-semibold text-primary-300">{match.status}</span>
+                    {match.competition ? <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-dark-300">{match.competition}</span> : null}
+                    <span className="text-sm text-dark-400">{new Date(match.date).toLocaleDateString()}</span>
+                  </div>
+                  <h2 className="mt-4 text-2xl font-bold text-white">
+                    {match.home} <span className="text-dark-500">vs</span> {match.away}
+                  </h2>
+                  <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-dark-400">
+                    <span className="inline-flex items-center gap-2">
+                      <HiLocationMarker className="h-4 w-4 text-primary-400" />
+                      <span>{match.venue}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <HiUserGroup className="h-4 w-4 text-primary-400" />
+                      <span>{match.scouts} scouts attending</span>
+                    </span>
+                  </div>
+                  {match.storyline ? <p className="mt-3 max-w-3xl text-sm leading-relaxed text-dark-300">{match.storyline}</p> : null}
+                  {match.featuredProspects?.length ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {match.featuredProspects.map((player) => (
+                        <span key={player} className="rounded-full border border-white/10 bg-dark-900/60 px-3 py-1 text-xs font-medium text-dark-200">
+                          {player}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="rounded-2xl border border-white/5 bg-dark-900/50 px-5 py-4 text-center">
+                  <p className="text-xs uppercase tracking-wider text-dark-400">Kickoff</p>
+                  <p className="mt-2 text-lg font-bold text-white">{new Date(match.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                  {match.broadcast ? <p className="mt-2 text-xs text-dark-500">{match.broadcast}</p> : null}
+                </div>
+                <button className="btn-secondary">
+                  <HiPlay className="h-4 w-4" />
+                  <span>Open Match Card</span>
+                </button>
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Matches;

@@ -1,222 +1,213 @@
-import { useEffect, useState } from "react";
-import api from "../api/api";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { HiSearch, HiSparkles, HiTrendingUp, HiViewGrid, HiViewList, HiX } from "react-icons/hi";
+import Loading from "../components/common/Loading";
+import PlayerCard from "../components/player/PlayerCard";
+import { playerAPI } from "../services/api";
 
-const emptyForm = {
-  fullName: "",
-  age: "",
-  position: "Forward",
-  nationality: "",
-  height: "",
-  preferredFoot: "Right",
-  teamId: "",
-  marketValue: "",
-  goals: "",
-  assists: "",
-  matchesPlayed: "",
-  yellowCards: "",
-  redCards: "",
-};
-
-function Players() {
+const Players = () => {
   const [players, setPlayers] = useState([]);
-  const [teams, setTeams] = useState([]);
-  const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState(null);
-  const [message, setMessage] = useState("");
-
-  const loadData = async () => {
-    const [playersRes, teamsRes] = await Promise.all([
-      api.get("/players"),
-      api.get("/teams"),
-    ]);
-
-    setPlayers(playersRes.data);
-    setTeams(teamsRes.data);
-  };
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState("all");
+  const [sortBy, setSortBy] = useState("rating");
+  const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
-    loadData();
+    const fetchPlayers = async () => {
+      const response = await playerAPI.getAll();
+      setPlayers(response.data);
+      setLoading(false);
+    };
+
+    fetchPlayers();
   }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const positions = ["all", "GK", "DEF", "CB", "MID", "CM", "FWD", "ST", "LW", "RW"];
 
-  const resetForm = () => {
-    setForm(emptyForm);
-    setEditingId(null);
-  };
+  const filteredPlayers = useMemo(() => {
+    return [...players]
+      .filter((player) => {
+        const haystack = `${player.name} ${player.nationality || ""} ${player.club || ""}`.toLowerCase();
+        const matchesSearch = haystack.includes(searchQuery.toLowerCase());
+        const matchesPosition = selectedPosition === "all" || player.position === selectedPosition;
+        return matchesSearch && matchesPosition;
+      })
+      .sort((a, b) => {
+        if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
+        if (sortBy === "goals") return (b.goals || 0) - (a.goals || 0);
+        if (sortBy === "age") return (a.age || 0) - (b.age || 0);
+        if (sortBy === "name") return a.name.localeCompare(b.name);
+        return 0;
+      });
+  }, [players, searchQuery, selectedPosition, sortBy]);
 
-  const buildPayload = () => ({
-    fullName: form.fullName,
-    age: Number(form.age),
-    position: form.position,
-    nationality: form.nationality,
-    height: Number(form.height),
-    preferredFoot: form.preferredFoot,
-    teamId: form.teamId,
-    marketValue: Number(form.marketValue),
-    stats: {
-      goals: Number(form.goals || 0),
-      assists: Number(form.assists || 0),
-      matchesPlayed: Number(form.matchesPlayed || 0),
-      yellowCards: Number(form.yellowCards || 0),
-      redCards: Number(form.redCards || 0),
-    },
-  });
+  const topScorers = useMemo(() => [...players].sort((a, b) => (b.goals || 0) - (a.goals || 0)).slice(0, 3), [players]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
+  if (loading) {
+    return <Loading text="Discovering talent..." />;
+  }
 
-    if (editingId) {
-      await api.put(`/players/${editingId}`, buildPayload());
-      setMessage("Player updated successfully.");
-    } else {
-      await api.post("/players", buildPayload());
-      setMessage("Player created successfully.");
-    }
-
-    resetForm();
-    loadData();
-  };
-
-  const handleEdit = (player) => {
-    setEditingId(player._id);
-
-    setForm({
-      fullName: player.fullName || "",
-      age: player.age || "",
-      position: player.position || "Forward",
-      nationality: player.nationality || "",
-      height: player.height || "",
-      preferredFoot: player.preferredFoot || "Right",
-      teamId: player.teamId?._id || player.teamId || "",
-      marketValue: player.marketValue || "",
-      goals: player.stats?.goals || "",
-      assists: player.stats?.assists || "",
-      matchesPlayed: player.stats?.matchesPlayed || "",
-      yellowCards: player.stats?.yellowCards || "",
-      redCards: player.stats?.redCards || "",
-    });
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirm("Delete this player?")) return;
-
-    await api.delete(`/players/${id}`);
-    loadData();
-  };
+  const averageRating = players.length
+    ? (players.reduce((sum, player) => sum + (player.rating || 0), 0) / players.length).toFixed(1)
+    : "0.0";
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <div>
-          <span className="section-label">CRUD + References</span>
-          <h1>Players</h1>
-          <p>Manage players and connect them with teams using ObjectId references.</p>
+    <div className="min-h-screen py-8">
+      <div className="page-container">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <h1 className="font-display text-4xl font-bold text-white">
+            Discover <span className="gradient-text">Talent</span>
+          </h1>
+          <p className="mt-2 text-lg text-dark-400">Browse verified players from around the world and sort for fit, output, or upside.</p>
+        </motion.div>
+
+        <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {[
+            { label: "Verified player pool", value: players.length, icon: HiSparkles, note: "Profiles ready for quick review" },
+            { label: "Average rating", value: averageRating, icon: HiTrendingUp, note: "Across the active discovery board" },
+            { label: "Top scorer", value: topScorers[0]?.name || "-", icon: HiSparkles, note: `${topScorers[0]?.goals || 0} goals this season` }
+          ].map((item) => (
+            <div key={item.label} className="glass-card p-5">
+              <item.icon className="mb-3 h-5 w-5 text-primary-400" />
+              <p className="text-sm text-dark-400">{item.label}</p>
+              <p className="mt-2 text-2xl font-bold text-white">{item.value}</p>
+              <p className="mt-1 text-xs text-dark-500">{item.note}</p>
+            </div>
+          ))}
         </div>
-      </div>
 
-      {message && <div className="success-box">{message}</div>}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="glass-card mb-8 p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+            <div className="relative flex-1">
+              <HiSearch className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-dark-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search by name, nationality, or club..."
+                className="input-field pl-12"
+              />
+              {searchQuery ? (
+                <button onClick={() => setSearchQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-400 hover:text-white">
+                  <HiX className="h-5 w-5" />
+                </button>
+              ) : null}
+            </div>
 
-      <div className="crud-grid">
-        <form className="panel form-panel" onSubmit={handleSubmit}>
-          <h2>{editingId ? "Edit Player" : "Add Player"}</h2>
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className="input-field w-full lg:w-48">
+              <option value="rating">Sort by Rating</option>
+              <option value="goals">Sort by Goals</option>
+              <option value="age">Sort by Age</option>
+              <option value="name">Sort by Name</option>
+            </select>
 
-          <input name="fullName" placeholder="Full name" value={form.fullName} onChange={handleChange} required />
-          <input name="age" type="number" placeholder="Age" value={form.age} onChange={handleChange} required />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`rounded-xl p-3 ${viewMode === "grid" ? "border border-primary-500/30 bg-primary-500/20 text-primary-300" : "glass text-dark-400 hover:text-white"}`}
+              >
+                <HiViewGrid className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`rounded-xl p-3 ${viewMode === "list" ? "border border-primary-500/30 bg-primary-500/20 text-primary-300" : "glass text-dark-400 hover:text-white"}`}
+              >
+                <HiViewList className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
 
-          <select name="position" value={form.position} onChange={handleChange}>
-            <option>Goalkeeper</option>
-            <option>Defender</option>
-            <option>Midfielder</option>
-            <option>Forward</option>
-          </select>
-
-          <input name="nationality" placeholder="Nationality" value={form.nationality} onChange={handleChange} required />
-          <input name="height" type="number" placeholder="Height cm" value={form.height} onChange={handleChange} required />
-
-          <select name="preferredFoot" value={form.preferredFoot} onChange={handleChange}>
-            <option>Left</option>
-            <option>Right</option>
-            <option>Both</option>
-          </select>
-
-          <select name="teamId" value={form.teamId} onChange={handleChange} required>
-            <option value="">Select team</option>
-            {teams.map((team) => (
-              <option key={team._id} value={team._id}>
-                {team.name}
-              </option>
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-4">
+            {positions.map((position) => (
+              <button
+                key={position}
+                onClick={() => setSelectedPosition(position)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                  selectedPosition === position
+                    ? "bg-primary-500 text-white shadow-glow-green"
+                    : "bg-dark-800 text-dark-300 hover:bg-dark-700 hover:text-white"
+                }`}
+              >
+                {position === "all" ? "All Positions" : position}
+              </button>
             ))}
-          </select>
+          </div>
+        </motion.div>
 
-          <input name="marketValue" type="number" placeholder="Market value" value={form.marketValue} onChange={handleChange} required />
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-sm text-dark-400">
+            Showing <span className="font-semibold text-white">{filteredPlayers.length}</span> players
+          </p>
+          {searchQuery || selectedPosition !== "all" ? (
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedPosition("all");
+              }}
+              className="flex items-center gap-1 text-sm text-primary-300 hover:text-primary-200"
+            >
+              <HiX className="h-4 w-4" />
+              <span>Clear Filters</span>
+            </button>
+          ) : null}
+        </div>
 
-          <div className="mini-grid">
-            <input name="goals" type="number" placeholder="Goals" value={form.goals} onChange={handleChange} />
-            <input name="assists" type="number" placeholder="Assists" value={form.assists} onChange={handleChange} />
-            <input name="matchesPlayed" type="number" placeholder="Matches" value={form.matchesPlayed} onChange={handleChange} />
-            <input name="yellowCards" type="number" placeholder="Yellow" value={form.yellowCards} onChange={handleChange} />
-            <input name="redCards" type="number" placeholder="Red" value={form.redCards} onChange={handleChange} />
+        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="rounded-2xl border border-white/10 bg-dark-900/50 p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <HiTrendingUp className="h-5 w-5 text-primary-400" />
+              <h2 className="text-lg font-bold text-white">Trending now</h2>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {topScorers.map((player) => (
+                <div key={player.id} className="rounded-xl border border-white/5 bg-dark-950/60 p-4">
+                  <p className="font-semibold text-white">{player.name}</p>
+                  <p className="mt-1 text-xs text-dark-400">
+                    {player.position} - {player.club}
+                  </p>
+                  <p className="mt-3 text-2xl font-bold text-white">{player.goals}</p>
+                  <p className="text-xs uppercase tracking-wider text-dark-500">Goals</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="form-actions">
-            <button type="submit">{editingId ? "Update Player" : "Create Player"}</button>
-            {editingId && <button type="button" className="secondary-btn" onClick={resetForm}>Cancel</button>}
-          </div>
-        </form>
-
-        <div className="panel table-panel">
-          <h2>Player List</h2>
-
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Team</th>
-                  <th>Position</th>
-                  <th>Goals</th>
-                  <th>Value</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {players.map((player) => (
-                  <tr key={player._id}>
-                    <td>{player.fullName}</td>
-                    <td>{player.teamId?.name || "No team"}</td>
-                    <td>{player.position}</td>
-                    <td>{player.stats?.goals || 0}</td>
-                    <td>€{Number(player.marketValue).toLocaleString()}</td>
-                    <td className="actions">
-  <Link className="small-link-btn" to={`/players/${player._id}`}>
-    View
-  </Link>
-  <button onClick={() => handleEdit(player)}>Edit</button>
-  <button className="danger-btn" onClick={() => handleDelete(player._id)}>
-    Delete
-  </button>
-</td>
-                  </tr>
-                ))}
-
-                {players.length === 0 && (
-                  <tr>
-                    <td colSpan="6" className="empty-cell">No players found.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="rounded-2xl border border-white/10 bg-dark-900/50 p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <HiSparkles className="h-5 w-5 text-primary-400" />
+              <h2 className="text-lg font-bold text-white">Scout lens</h2>
+            </div>
+            <div className="space-y-3">
+              {[
+                "Fast-rising demand for U23 center backs and press-resistant midfielders.",
+                "Forward profiles with real off-ball separation are moving first in this mock market.",
+                "The best value range right now sits between EUR 3M and EUR 6M."
+              ].map((item) => (
+                <div key={item} className="rounded-xl border border-white/5 bg-dark-950/60 p-4 text-sm leading-relaxed text-dark-300">
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+
+        {filteredPlayers.length ? (
+          <div className={`grid gap-6 ${viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}>
+            {filteredPlayers.map((player, index) => (
+              <PlayerCard key={player.id} player={player} index={index} compact={viewMode === "list"} />
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 text-center">
+            <HiSearch className="mx-auto mb-4 h-16 w-16 text-dark-600" />
+            <h3 className="text-xl font-semibold text-white">No players found</h3>
+            <p className="mt-2 text-dark-400">Try adjusting your search or filter criteria.</p>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default Players;
