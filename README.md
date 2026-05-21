@@ -1,68 +1,108 @@
-# Football Talent App
+# ⚽ Football Talent App
 
-Ky projekt eshte ndertuar me:
+A full-stack web application for managing football talents, built with the MERN stack. Users can log in and perform full CRUD operations (Create, Read, Update, Delete) on player data.
 
-- MongoDB per databazen
-- Node.js dhe Express.js per backend
-- React.js me Vite per frontend
+***
 
-Projekti permban:
+## 🛠️ Tech Stack
 
-- Login dhe register me JWT token
-- CRUD per `teams`
-- CRUD per `players`
-- CRUD per `matches`
-- CRUD per `scouts`
-- CRUD per `scout reports`
-- Lidhje mes koleksioneve ne MongoDB me `ObjectId` dhe `populate`
+| Layer      | Technology          |
+|------------|---------------------|
+| Frontend   | React.js            |
+| Backend    | Node.js, Express.js |
+| Database   | MongoDB + Mongoose  |
 
-## Si te niset projekti
+***
 
-### 1. Backend
+## ✨ Features
 
-Shko ne folderin `backend` dhe krijo `.env` sipas `backend/.env.example`.
+- 🔐 User Login / Authentication
+- ➕ Add new football talents
+- 📋 View all players
+- ✏️ Edit player information
+- 🗑️ Delete players
 
-```powershell
-cd C:\Users\ADMIN\Desktop\football-talent-app\backend
-npm install
-npm start
+***
+
+## 📁 Project Structure
+
+```
+football-talent-app/
+├── client/          # React frontend
+│   └── src/
+│       ├── components/
+│       └── pages/
+├── server/          # Node.js + Express backend
+│   ├── models/
+│   ├── routes/
+│   └── controllers/
+└── .env             # Environment variables
 ```
 
-Backend zakonisht hapet ne:
+***
 
-```text
-http://localhost:5000
-```
+## 🚀 Getting Started
 
-### 2. Frontend
+### Prerequisites
+- [Node.js](https://nodejs.org/) installed
+- [MongoDB](https://www.mongodb.com/) running locally or a MongoDB Atlas URI
 
-```powershell
-cd C:\Users\ADMIN\Desktop\football-talent-app\frontend
-npm install
-npm run dev -- --host 127.0.0.1
-```
+### Installation
 
-Frontend hapet ne:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/dhurkaa/football-talent-app.git
+   cd football-talent-app
+   ```
 
-```text
-http://127.0.0.1:5173
-```
+2. **Install backend dependencies**
+   ```bash
+   cd server
+   npm install
+   ```
 
-## Rruget kryesore
+3. **Install frontend dependencies**
+   ```bash
+   cd ../client
+   npm install
+   ```
 
-- `/login`
-- `/register`
-- `/dashboard`
-- `/teams`
-- `/players`
-- `/matches`
-- `/scouts`
-- `/scout-reports`
-- `/analytics`
-- `/kosovo-live`
+4. **Set up environment variables**  
+   Create a `.env` file inside the `server/` folder:
+   ```env
+   MONGO_URI=your_mongodb_connection_string
+   PORT=5000
+   ```
 
-## Dokumentimi
+5. **Run the backend**
+   ```bash
+   cd server
+   npm start
+   ```
 
-Per prezantim dhe sqarim te logjikes se kodit, shiko:
+6. **Run the frontend**
+   ```bash
+   cd client
+   npm start
+   ```
 
-- [DOKUMENTIMI_PROJEKTIT.md](C:/Users/ADMIN/Desktop/football-talent-app/DOKUMENTIMI_PROJEKTIT.md)
+7. Open your browser and go to `http://localhost:3000`
+
+***
+
+## 🔗 API Endpoints
+
+| Method | Endpoint            | Description          |
+|--------|---------------------|----------------------|
+| POST   | `/api/auth/login`   | Login user           |
+| GET    | `/api/players`      | Get all players      |
+| POST   | `/api/players`      | Add a new player     |
+| PUT    | `/api/players/:id`  | Update a player      |
+| DELETE | `/api/players/:id`  | Delete a player      |
+
+***
+
+## 👨‍💻 Author
+
+**Dhurim Citaku**  
+GitHub: [@dhurkaa](https://github.com/dhurkaa)
