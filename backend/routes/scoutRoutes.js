@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", protect, async (req, res) => {
   try {
-    const scouts = await Scout.find().sort({ createdAt: -1 });
+    const scouts = await Scout.find({ owner: req.user._id }).sort({ createdAt: -1 });
     res.json(scouts);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,7 +15,7 @@ router.get("/", protect, async (req, res) => {
 
 router.post("/", protect, async (req, res) => {
   try {
-    const scout = await Scout.create(req.body);
+    const scout = await Scout.create({ ...req.body, owner: req.user._id });
     res.status(201).json(scout);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -24,7 +24,7 @@ router.post("/", protect, async (req, res) => {
 
 router.get("/:id", protect, async (req, res) => {
   try {
-    const scout = await Scout.findById(req.params.id);
+    const scout = await Scout.findOne({ _id: req.params.id, owner: req.user._id });
 
     if (!scout) {
       return res.status(404).json({ message: "Scout not found" });
@@ -38,10 +38,14 @@ router.get("/:id", protect, async (req, res) => {
 
 router.put("/:id", protect, async (req, res) => {
   try {
-    const scout = await Scout.findByIdAndUpdate(req.params.id, req.body, {
+    const scout = await Scout.findOneAndUpdate(
+      { _id: req.params.id, owner: req.user._id },
+      req.body,
+      {
       new: true,
       runValidators: true
-    });
+      }
+    );
 
     if (!scout) {
       return res.status(404).json({ message: "Scout not found" });
@@ -55,7 +59,10 @@ router.put("/:id", protect, async (req, res) => {
 
 router.delete("/:id", protect, async (req, res) => {
   try {
-    const scout = await Scout.findByIdAndDelete(req.params.id);
+    const scout = await Scout.findOneAndDelete({
+      _id: req.params.id,
+      owner: req.user._id
+    });
 
     if (!scout) {
       return res.status(404).json({ message: "Scout not found" });

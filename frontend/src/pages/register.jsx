@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { HiEye, HiEyeOff, HiLockClosed, HiMail, HiUser, HiUserGroup } from "react-icons/hi";
 import { GiSoccerBall } from "react-icons/gi";
 import { useAuth } from "../context/AuthContext";
-import { authAPI } from "../services/api";
+import { authAPI, premierLeagueAPI } from "../services/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -13,15 +13,69 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "player"
+    role: "player",
+    selectedPremierLeagueTeamId: "",
+    selectedPremierLeaguePlayerId: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [teamOptions, setTeamOptions] = useState([]);
+  const [playerOptions, setPlayerOptions] = useState([]);
+  const [loadingTeams, setLoadingTeams] = useState(false);
+  const [loadingPlayers, setLoadingPlayers] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchTeams = async () => {
+      if (formData.role !== "scout") {
+        return;
+      }
+
+      setLoadingTeams(true);
+      try {
+        const response = await premierLeagueAPI.getTeams();
+        setTeamOptions(response.data);
+      } catch (error) {
+        toast.error("Could not load Premier League teams.");
+      } finally {
+        setLoadingTeams(false);
+      }
+    };
+
+    fetchTeams();
+  }, [formData.role]);
+
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      if (formData.role !== "scout" || !formData.selectedPremierLeagueTeamId) {
+        setPlayerOptions([]);
+        return;
+      }
+
+      setLoadingPlayers(true);
+      try {
+        const response = await premierLeagueAPI.getTeamPlayers(formData.selectedPremierLeagueTeamId);
+        setPlayerOptions(response.data);
+      } catch (error) {
+        toast.error("Could not load squad players for that team.");
+      } finally {
+        setLoadingPlayers(false);
+      }
+    };
+
+    fetchPlayers();
+  }, [formData.role, formData.selectedPremierLeagueTeamId]);
+
   const handleChange = (event) => {
-    setFormData((current) => ({ ...current, [event.target.name]: event.target.value }));
+    const { name, value } = event.target;
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+      ...(name === "selectedPremierLeagueTeamId"
+        ? { selectedPremierLeaguePlayerId: "" }
+        : {})
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -37,22 +91,27 @@ const Register = () => {
       return;
     }
 
+    if (
+      formData.role === "scout" &&
+      (!formData.selectedPremierLeagueTeamId || !formData.selectedPremierLeaguePlayerId)
+    ) {
+      toast.error("Scouts must choose a Premier League team and target player.");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role
+        role: formData.role,
+        selectedPremierLeagueTeamId: formData.selectedPremierLeagueTeamId || null,
+        selectedPremierLeaguePlayerId: formData.selectedPremierLeaguePlayerId || null
       };
       const response = await authAPI.register(payload);
       const token = response.data.token;
-      const user = response.data.user || {
-        _id: response.data._id,
-        name: response.data.name,
-        email: response.data.email,
-        role: payload.role
-      };
+      const user = response.data.user;
 
       login(user, token);
       toast.success("Account created successfully.");
@@ -100,6 +159,54 @@ const Register = () => {
               </button>
             ))}
           </div>
+
+          {formData.role === "scout" ? (
+            <div className="mb-6 space-y-4 rounded-2xl border border-primary-500/15 bg-primary-500/5 p-4">
+              <div>
+                <label className="field-label">Premier League Club</label>
+                <select
+                  name="selectedPremierLeagueTeamId"
+                  value={formData.selectedPremierLeagueTeamId}
+                  onChange={handleChange}
+                  className="input-field"
+                  disabled={loadingTeams}
+                  required
+                >
+                  <option value="">{loadingTeams ? "Loading teams..." : "Select a club"}</option>
+                  {teamOptions.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="field-label">Target Player</label>
+                <select
+                  name="selectedPremierLeaguePlayerId"
+                  value={formData.selectedPremierLeaguePlayerId}
+                  onChange={handleChange}
+                  className="input-field"
+                  disabled={!formData.selectedPremierLeagueTeamId || loadingPlayers}
+                  required
+                >
+                  <option value="">
+                    {!formData.selectedPremierLeagueTeamId
+                      ? "Choose a club first"
+                      : loadingPlayers
+                      ? "Loading squad..."
+                      : "Select a player"}
+                  </option>
+                  {playerOptions.map((player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.displayName} · {player.position}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

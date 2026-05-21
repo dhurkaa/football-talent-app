@@ -32,6 +32,16 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
+const DashboardRoute = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  return user?.role === "scout" ? <ScoutDashboard /> : <Dashboard />;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -65,7 +75,7 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <DashboardRoute />
                 </ProtectedRoute>
               }
             />

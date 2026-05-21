@@ -6,9 +6,9 @@ const PlayerStats = ({ player }) => {
     { label: "Appearances", value: player.matches || player.seasonStats?.appearances || 0 },
     { label: "Goals", value: player.goals || player.seasonStats?.goals || 0 },
     { label: "Assists", value: player.assists || player.seasonStats?.assists || 0 },
-    { label: "Pass Accuracy", value: `${player.seasonStats?.passAccuracy || 82}%` },
-    { label: "Minutes", value: player.seasonStats?.minutesPlayed || 2890 },
-    { label: "Shots On Target", value: player.seasonStats?.shotsOnTarget || 67 }
+    { label: "Pass Accuracy", value: `${player.seasonStats?.passAccuracy || 0}%` },
+    { label: "Minutes", value: player.seasonStats?.minutesPlayed || 0 },
+    { label: "Shots On Target", value: player.seasonStats?.shotsOnTarget || 0 }
   ];
 
   return (

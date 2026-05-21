@@ -19,7 +19,7 @@ const Matches = () => {
   }, []);
 
   const summary = useMemo(() => {
-    const liveCount = matches.filter((match) => match.status === "Live").length;
+    const liveCount = matches.filter((match) => match.status === "scheduled").length;
     const totalScouts = matches.reduce((sum, match) => sum + (match.scouts || 0), 0);
     return {
       liveCount,
@@ -44,7 +44,7 @@ const Matches = () => {
 
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           {[
-            { label: "Live fixtures", value: summary.liveCount },
+            { label: "Scheduled fixtures", value: summary.liveCount },
             { label: "Scouts assigned", value: summary.totalScouts },
             { label: "Featured prospects", value: summary.featuredProspects }
           ].map((item) => (

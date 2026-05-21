@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const scoutReportSchema = new mongoose.Schema(
   {
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true
+    },
+
     playerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Player",
@@ -50,5 +57,6 @@ const scoutReportSchema = new mongoose.Schema(
 scoutReportSchema.index({ playerId: 1 });
 scoutReportSchema.index({ scoutId: 1 });
 scoutReportSchema.index({ rating: -1 });
+scoutReportSchema.index({ owner: 1, createdAt: -1 });
 
 module.exports = mongoose.model("ScoutReport", scoutReportSchema);

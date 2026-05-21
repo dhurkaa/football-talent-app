@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const teamSchema = new mongoose.Schema(
   {
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true
+    },
+
     name: {
       type: String,
       required: [true, "Team name is required"],
@@ -65,5 +72,7 @@ const teamSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+teamSchema.index({ owner: 1, name: 1 });
 
 module.exports = mongoose.model("Team", teamSchema);

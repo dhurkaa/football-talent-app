@@ -1,12 +1,13 @@
 const express = require("express");
 const Player = require("../models/player");
+const Team = require("../models/team");
 const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 router.get("/", protect, async (req, res) => {
   try {
-    const players = await Player.find()
+    const players = await Player.find({ owner: req.user._id })
       .populate("teamId", "name city stadium")
       .sort({ createdAt: -1 });
 
@@ -18,7 +19,16 @@ router.get("/", protect, async (req, res) => {
 
 router.post("/", protect, async (req, res) => {
   try {
-    const player = await Player.create(req.body);
+    const team = await Team.findOne({
+      _id: req.body.teamId,
+      owner: req.user._id
+    });
+
+    if (!team) {
+      return res.status(400).json({ message: "Team not found for this user" });
+    }
+
+    const player = await Player.create({ ...req.body, owner: req.user._id });
 
     const populatedPlayer = await Player.findById(player._id).populate(
       "teamId",
@@ -33,7 +43,10 @@ router.post("/", protect, async (req, res) => {
 
 router.get("/:id", protect, async (req, res) => {
   try {
-    const player = await Player.findById(req.params.id).populate(
+    const player = await Player.findOne({
+      _id: req.params.id,
+      owner: req.user._id
+    }).populate(
       "teamId",
       "name city stadium"
     );
@@ -50,10 +63,25 @@ router.get("/:id", protect, async (req, res) => {
 
 router.put("/:id", protect, async (req, res) => {
   try {
-    const player = await Player.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    }).populate("teamId", "name city stadium");
+    if (req.body.teamId) {
+      const team = await Team.findOne({
+        _id: req.body.teamId,
+        owner: req.user._id
+      });
+
+      if (!team) {
+        return res.status(400).json({ message: "Team not found for this user" });
+      }
+    }
+
+    const player = await Player.findOneAndUpdate(
+      { _id: req.params.id, owner: req.user._id },
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    ).populate("teamId", "name city stadium");
 
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
@@ -67,7 +95,10 @@ router.put("/:id", protect, async (req, res) => {
 
 router.delete("/:id", protect, async (req, res) => {
   try {
-    const player = await Player.findByIdAndDelete(req.params.id);
+    const player = await Player.findOneAndDelete({
+      _id: req.params.id,
+      owner: req.user._id
+    });
 
     if (!player) {
       return res.status(404).json({ message: "Player not found" });

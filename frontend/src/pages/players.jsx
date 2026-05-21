@@ -10,7 +10,7 @@ const Players = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("all");
-  const [sortBy, setSortBy] = useState("rating");
+  const [sortBy, setSortBy] = useState("goals");
   const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
@@ -48,8 +48,8 @@ const Players = () => {
     return <Loading text="Discovering talent..." />;
   }
 
-  const averageRating = players.length
-    ? (players.reduce((sum, player) => sum + (player.rating || 0), 0) / players.length).toFixed(1)
+  const averageAge = players.length
+    ? (players.reduce((sum, player) => sum + (player.age || 0), 0) / players.length).toFixed(1)
     : "0.0";
 
   return (
@@ -64,8 +64,8 @@ const Players = () => {
 
         <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
           {[
-            { label: "Verified player pool", value: players.length, icon: HiSparkles, note: "Profiles ready for quick review" },
-            { label: "Average rating", value: averageRating, icon: HiTrendingUp, note: "Across the active discovery board" },
+            { label: "Verified player pool", value: players.length, icon: HiSparkles, note: "Real records stored in your workspace" },
+            { label: "Average age", value: averageAge, icon: HiTrendingUp, note: "Across your current player pool" },
             { label: "Top scorer", value: topScorers[0]?.name || "-", icon: HiSparkles, note: `${topScorers[0]?.goals || 0} goals this season` }
           ].map((item) => (
             <div key={item.label} className="glass-card p-5">
@@ -96,7 +96,6 @@ const Players = () => {
             </div>
 
             <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className="input-field w-full lg:w-48">
-              <option value="rating">Sort by Rating</option>
               <option value="goals">Sort by Goals</option>
               <option value="age">Sort by Age</option>
               <option value="name">Sort by Name</option>
@@ -180,9 +179,9 @@ const Players = () => {
             </div>
             <div className="space-y-3">
               {[
-                "Fast-rising demand for U23 center backs and press-resistant midfielders.",
-                "Forward profiles with real off-ball separation are moving first in this mock market.",
-                "The best value range right now sits between EUR 3M and EUR 6M."
+                "This list is now driven by your stored player records only.",
+                "Use goals, appearances, and scouting reports to separate current output from upside.",
+                "Add reports and matches next if you want the downstream decision pages to become richer."
               ].map((item) => (
                 <div key={item} className="rounded-xl border border-white/5 bg-dark-950/60 p-4 text-sm leading-relaxed text-dark-300">
                   {item}

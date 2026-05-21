@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const playerSchema = new mongoose.Schema(
   {
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true
+    },
+
     fullName: {
       type: String,
       required: [true, "Player full name is required"],
@@ -90,6 +97,6 @@ const playerSchema = new mongoose.Schema(
 playerSchema.index({ fullName: 1 });
 playerSchema.index({ teamId: 1 });
 playerSchema.index({ position: 1 });
-playerSchema.index({ fullName: 1, teamId: 1 }, { unique: true });
+playerSchema.index({ owner: 1, fullName: 1, teamId: 1 }, { unique: true });
 
 module.exports = mongoose.model("Player", playerSchema);

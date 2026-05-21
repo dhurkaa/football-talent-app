@@ -95,7 +95,7 @@ const PlayerProfile = () => {
                     <GiSoccerBall className="h-16 w-16 text-white sm:h-20 sm:w-20" />
                   </div>
                   <div className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-xl border-4 border-dark-900 bg-amber-500">
-                    <span className="text-sm font-bold text-white">{player.rating}</span>
+                    <span className="text-sm font-bold text-white">{player.rating ?? "-"}</span>
                   </div>
                 </div>
 

@@ -22,6 +22,9 @@ app.use("/api/players", require("./routes/playerRoutes"));
 app.use("/api/matches", require("./routes/matchRoutes"));
 app.use("/api/scouts", require("./routes/scoutRoutes"));
 app.use("/api/scout-reports", require("./routes/scoutReportRoutes"));
+app.use("/api/news", require("./routes/newsRoutes"));
+app.use("/api/overview", require("./routes/overviewRoutes"));
+app.use("/api/premier-league", require("./routes/premierLeagueRoutes"));
 
 const PORT = process.env.PORT || 5000;
 

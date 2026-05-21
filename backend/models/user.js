@@ -21,6 +21,32 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: 6
+    },
+
+    role: {
+      type: String,
+      enum: ["player", "scout"],
+      default: "player"
+    },
+
+    selectedPremierLeagueTeamId: {
+      type: Number,
+      default: null
+    },
+
+    selectedPremierLeaguePlayerId: {
+      type: Number,
+      default: null
+    },
+
+    watchlist: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Player"
+        }
+      ],
+      default: []
     }
   },
   {

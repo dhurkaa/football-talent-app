@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const matchSchema = new mongoose.Schema(
   {
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true
+    },
+
     homeTeamId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Team",
@@ -51,5 +58,6 @@ const matchSchema = new mongoose.Schema(
 matchSchema.index({ matchDate: 1 });
 matchSchema.index({ homeTeamId: 1 });
 matchSchema.index({ awayTeamId: 1 });
+matchSchema.index({ owner: 1, matchDate: 1 });
 
 module.exports = mongoose.model("Match", matchSchema);
