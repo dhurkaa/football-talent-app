@@ -1,20 +1,18 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import Navbar from "./Navbar";
+import AppSidebar from "./AppSidebar";
 import Footer from "./Footer";
-import { useAuth } from "../../context/AuthContext";
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
-  const hideFooter =
-    isAuthenticated &&
-    !["/", "/login", "/register", "/about"].includes(location.pathname);
+  const isAuthPage = ["/login", "/register"].includes(location.pathname);
+  const showSidebar = !isAuthPage;
+  const hideFooter = showSidebar && !["/", "/about"].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-dark-950">
-      <Navbar />
-      <main className={`flex-1 pt-20 ${isAuthenticated ? "lg:pt-32" : ""}`}>{children}</main>
+      <AppSidebar />
+      <main className={showSidebar ? "min-h-screen pt-20 lg:ml-80 lg:pt-0" : "min-h-screen"}>{children}</main>
       {hideFooter ? null : <Footer />}
     </div>
   );

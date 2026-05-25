@@ -33,9 +33,10 @@ const Home = () => {
 
   const productPoints = [
     { title: "Private workspace", description: "Every stored team, player, match, scout, and report stays scoped to the logged-in user.", icon: HiLockClosed },
+    { title: "AI scouting lab", description: "Drill scoring, similarity search, highlight generation, talent alerts, and export packs now live in one workspace.", icon: HiLightningBolt },
     { title: "Live Premier League feed", description: "Latest headlines come from a real BBC Sport Premier League feed instead of seeded demo cards.", icon: HiGlobe },
     { title: "Scouting-ready structure", description: "Players, matches, and reports are linked so the downstream views can stay honest.", icon: HiShieldCheck },
-    { title: "No demo fallbacks", description: "Signed-in pages now render empty states when your data is missing instead of inventing sample output.", icon: HiLightningBolt }
+    { title: "No demo fallbacks", description: "Signed-in pages now render empty states when your data is missing instead of inventing sample output.", icon: HiSearch }
   ];
 
   return (
@@ -80,9 +81,9 @@ const Home = () => {
                   <span>{isAuthenticated ? "Open Dashboard" : "Create Account"}</span>
                   <HiArrowRight className="h-5 w-5" />
                 </Link>
-                <Link to={isAuthenticated ? "/market" : "/login"} className="btn-secondary px-8 py-4 text-lg">
+                <Link to={isAuthenticated ? "/ai-lab" : "/login"} className="btn-secondary px-8 py-4 text-lg">
                   <HiSearch className="h-5 w-5" />
-                  <span>{isAuthenticated ? "See Market Intel" : "Sign In"}</span>
+                  <span>{isAuthenticated ? "Open AI Lab" : "Sign In"}</span>
                 </Link>
               </motion.div>
             </div>

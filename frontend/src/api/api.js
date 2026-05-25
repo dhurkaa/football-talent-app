@@ -5,7 +5,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("football_token");
+  const token = localStorage.getItem("footballTalentToken") || localStorage.getItem("football_token");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

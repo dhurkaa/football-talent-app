@@ -11,6 +11,7 @@ import {
   HiMenu,
   HiPresentationChartBar,
   HiSearch,
+  HiSparkles,
   HiTemplate,
   HiOfficeBuilding,
   HiUserGroup,
@@ -24,6 +25,7 @@ import { useAuth } from "../../context/AuthContext";
 const publicLinks = [
   { path: "/", label: "Home", icon: HiHome },
   { path: "/players", label: "Players", icon: HiUserGroup },
+  { path: "/ai-lab", label: "AI Lab", icon: HiSparkles },
   { path: "/clubs", label: "Clubs", icon: HiOfficeBuilding },
   { path: "/matches", label: "Matches", icon: HiChartBar },
   { path: "/reports", label: "Reports", icon: HiClipboardList },
@@ -33,6 +35,7 @@ const publicLinks = [
 const workspacePrimaryLinks = [
   { path: "/dashboard", label: "Dashboard", icon: HiChartBar },
   { path: "/players", label: "Players", icon: HiUserGroup },
+  { path: "/ai-lab", label: "AI Lab", icon: HiSparkles },
   { path: "/matches", label: "Matches", icon: HiChartBar },
   { path: "/reports", label: "Reports", icon: HiClipboardList },
   { path: "/market", label: "Market", icon: HiGlobeAlt }

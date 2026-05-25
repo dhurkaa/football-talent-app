@@ -145,6 +145,10 @@ const PlayerProfile = () => {
                         <HiShare className="h-4 w-4" />
                         <span>Share</span>
                       </button>
+                      <Link to="/ai-lab" className="btn-secondary text-sm">
+                        <HiStar className="h-4 w-4" />
+                        <span>Open AI Lab</span>
+                      </Link>
                     </div>
                   </div>
 

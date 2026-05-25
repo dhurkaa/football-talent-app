@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Layout from "./components/layout/Layout";
@@ -21,6 +21,7 @@ import Presentation from "./pages/presentation";
 import WarRoom from "./pages/warRoom";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import AILab from "./pages/aiLab";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -45,71 +46,71 @@ const DashboardRoute = () => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: "#1e293b",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "12px",
-              padding: "16px"
-            },
-            success: {
-              iconTheme: { primary: "#22c55e", secondary: "#fff" }
-            },
-            error: {
-              iconTheme: { primary: "#ef4444", secondary: "#fff" }
-            }
-          }}
-        />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#1e293b",
+            color: "#fff",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "12px",
+            padding: "16px"
+          },
+          success: {
+            iconTheme: { primary: "#22c55e", secondary: "#fff" }
+          },
+          error: {
+            iconTheme: { primary: "#ef4444", secondary: "#fff" }
+          }
+        }}
+      />
 
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardRoute />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/players" element={<Players />} />
-            <Route path="/player/:id" element={<PlayerProfile />} />
-            <Route path="/market" element={<Market />} />
-            <Route path="/clubs" element={<Clubs />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/summary" element={<Summary />} />
-            <Route path="/shortlist" element={<Shortlist />} />
-            <Route path="/presentation" element={<Presentation />} />
-            <Route path="/war-room" element={<WarRoom />} />
-            <Route
-              path="/scout"
-              element={
-                <ProtectedRoute>
-                  <ScoutDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/edit-profile"
-              element={
-                <ProtectedRoute>
-                  <EditProfile />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/matches" element={<Matches />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardRoute />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/players" element={<Players />} />
+          <Route path="/player/:id" element={<PlayerProfile />} />
+          <Route path="/market" element={<Market />} />
+          <Route path="/clubs" element={<Clubs />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/summary" element={<Summary />} />
+          <Route path="/shortlist" element={<Shortlist />} />
+          <Route path="/presentation" element={<Presentation />} />
+          <Route path="/war-room" element={<WarRoom />} />
+          <Route path="/ai-lab" element={<AILab />} />
+          <Route
+            path="/scout"
+            element={
+              <ProtectedRoute>
+                <ScoutDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-profile"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/matches" element={<Matches />} />
+          <Route
+            path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
     </AuthProvider>
   );
 }

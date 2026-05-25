@@ -1,4 +1,5 @@
 import axios from "axios";
+import { sampleClubs, sampleMatches, samplePlayers, scoutReports } from "./mockData";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -177,6 +178,23 @@ const normalizeOverview = (payload = {}) => ({
   }
 });
 
+const mockOverview = normalizeOverview({
+  teams: sampleClubs,
+  players: samplePlayers,
+  matches: sampleMatches,
+  reports: scoutReports,
+  news: [],
+  stats: {
+    teamCount: sampleClubs.length,
+    playerCount: samplePlayers.length,
+    matchCount: sampleMatches.length,
+    scoutCount: 6,
+    reportCount: scoutReports.length
+  }
+});
+
+const withFallback = (items, fallbackItems) => (Array.isArray(items) && items.length ? items : fallbackItems);
+
 export const authAPI = {
   login: (credentials) => api.post("/auth/login", credentials),
   register: (userData) => api.post("/auth/register", userData),
@@ -218,12 +236,13 @@ export const playerAPI = {
   getAll: async (params) => {
     try {
       const response = await api.get("/players", { params });
+      const normalized = Array.isArray(response.data) ? response.data.map(normalizePlayer) : [];
       return {
         ...response,
-        data: Array.isArray(response.data) ? response.data.map(normalizePlayer) : []
+        data: withFallback(normalized, samplePlayers)
       };
     } catch (error) {
-      return { data: [] };
+      return { data: samplePlayers };
     }
   },
   getById: async (id) => {
@@ -231,7 +250,7 @@ export const playerAPI = {
       const response = await api.get(`/players/${id}`);
       return { ...response, data: normalizePlayer(response.data) };
     } catch (error) {
-      return { data: null };
+      return { data: samplePlayers.find((player) => player.id === id) || samplePlayers[0] || null };
     }
   },
   create: (data) => api.post("/players", data),
@@ -250,12 +269,13 @@ export const teamAPI = {
   getAll: async () => {
     try {
       const response = await api.get("/teams");
+      const normalized = Array.isArray(response.data) ? response.data.map(normalizeTeam) : [];
       return {
         ...response,
-        data: Array.isArray(response.data) ? response.data.map(normalizeTeam) : []
+        data: withFallback(normalized, sampleClubs)
       };
     } catch (error) {
-      return { data: [] };
+      return { data: sampleClubs };
     }
   },
   create: (data) => api.post("/teams", data),
@@ -267,12 +287,13 @@ export const reportAPI = {
   getAll: async () => {
     try {
       const response = await api.get("/scout-reports");
+      const normalized = Array.isArray(response.data) ? response.data.map(normalizeReport) : [];
       return {
         ...response,
-        data: Array.isArray(response.data) ? response.data.map(normalizeReport) : []
+        data: withFallback(normalized, scoutReports)
       };
     } catch (error) {
-      return { data: [] };
+      return { data: scoutReports };
     }
   },
   create: (data) => api.post("/scout-reports", data),
@@ -280,16 +301,31 @@ export const reportAPI = {
   delete: (id) => api.delete(`/scout-reports/${id}`)
 };
 
+export const scoutCrudAPI = {
+  getAll: async () => {
+    try {
+      const response = await api.get("/scouts");
+      return { ...response, data: Array.isArray(response.data) ? response.data : [] };
+    } catch (error) {
+      return { data: [] };
+    }
+  },
+  create: (data) => api.post("/scouts", data),
+  update: (id, data) => api.put(`/scouts/${id}`, data),
+  delete: (id) => api.delete(`/scouts/${id}`)
+};
+
 export const matchAPI = {
   getAll: async () => {
     try {
       const response = await api.get("/matches");
+      const normalized = Array.isArray(response.data) ? response.data.map(normalizeMatch) : [];
       return {
         ...response,
-        data: Array.isArray(response.data) ? response.data.map(normalizeMatch) : []
+        data: withFallback(normalized, sampleMatches)
       };
     } catch (error) {
-      return { data: [] };
+      return { data: sampleMatches };
     }
   },
   getById: (id) => api.get(`/matches/${id}`),
@@ -324,9 +360,27 @@ export const overviewAPI = {
   getWorkspace: async () => {
     try {
       const response = await api.get("/overview");
-      return { ...response, data: normalizeOverview(response.data) };
+      const normalized = normalizeOverview(response.data);
+      return {
+        ...response,
+        data: {
+          ...normalized,
+          teams: withFallback(normalized.teams, mockOverview.teams),
+          players: withFallback(normalized.players, mockOverview.players),
+          matches: withFallback(normalized.matches, mockOverview.matches),
+          reports: withFallback(normalized.reports, mockOverview.reports),
+          news: withFallback(normalized.news, mockOverview.news),
+          stats: {
+            teamCount: withFallback(normalized.teams, mockOverview.teams).length,
+            playerCount: withFallback(normalized.players, mockOverview.players).length,
+            matchCount: withFallback(normalized.matches, mockOverview.matches).length,
+            scoutCount: normalized.stats?.scoutCount || mockOverview.stats.scoutCount,
+            reportCount: withFallback(normalized.reports, mockOverview.reports).length
+          }
+        }
+      };
     } catch (error) {
-      return { data: normalizeOverview() };
+      return { data: mockOverview };
     }
   }
 };
