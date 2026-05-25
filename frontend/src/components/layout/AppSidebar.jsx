@@ -36,9 +36,7 @@ const strategyLinks = [
 ];
 
 const utilityLinks = [
-  { path: "/market", label: "Market Intel", icon: HiChartBar },
-  { path: "/presentation", label: "Presentation", icon: HiPresentationChartBar },
-  { path: "/about", label: "About", icon: HiClipboardList }
+  { path: "/market", label: "Market Intel", icon: HiChartBar }
 ];
 
 const SidebarNavSection = ({ title, links, onNavigate }) => (
@@ -110,7 +108,7 @@ const AppSidebar = () => {
       <div className="mt-8 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-300">Quick flow</p>
         <p className="mt-3 text-sm leading-relaxed text-dark-300">
-          Start in Players or AI Lab, move to Match Center and Reports, then close in Shortlist and Presentation.
+          Start in Players or AI Lab, move to Match Center and Reports, then close in Shortlist and Summary.
         </p>
       </div>
 

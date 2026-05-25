@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { GiSoccerBall } from "react-icons/gi";
-import { HiChartBar, HiClipboardList, HiLightningBolt, HiOfficeBuilding, HiPresentationChartBar, HiUserGroup } from "react-icons/hi";
+import { HiChartBar, HiClipboardList, HiLightningBolt, HiOfficeBuilding, HiTemplate, HiUserGroup } from "react-icons/hi";
 
 const Footer = () => {
   const productLinks = [
@@ -13,7 +13,6 @@ const Footer = () => {
 
   const workflowLinks = [
     { label: "Shortlist Board", path: "/shortlist" },
-    { label: "Presentation Mode", path: "/presentation" },
     { label: "Scout War Room", path: "/war-room" },
     { label: "Executive Summary", path: "/summary" }
   ];
@@ -33,7 +32,7 @@ const Footer = () => {
               </div>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-dark-400">
-              A clean football recruitment product for player discovery, decision support, and presentation-ready scouting stories.
+              A clean football recruitment product for player discovery, decision support, and scouting stories built around real workflow views.
             </p>
           </div>
 
@@ -62,17 +61,17 @@ const Footer = () => {
 
           <div className="glass-card p-6">
             <div className="mb-4 flex items-center gap-2">
-              <HiPresentationChartBar className="h-5 w-5 text-primary-400" />
-              <h3 className="text-lg font-bold text-white">Demo flow</h3>
+              <HiTemplate className="h-5 w-5 text-primary-400" />
+              <h3 className="text-lg font-bold text-white">Decision flow</h3>
             </div>
             <div className="space-y-3 text-sm text-dark-300">
               <p>1. Open Market Intel to frame demand and price movement.</p>
               <p>2. Move into Players and Reports for conviction and evidence.</p>
-              <p>3. Close on Shortlist, Summary, and Presentation Mode.</p>
+              <p>3. Close on Shortlist, Summary, and War Room.</p>
             </div>
-            <Link to="/presentation" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-300 transition-colors hover:text-primary-200">
+            <Link to="/summary" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-300 transition-colors hover:text-primary-200">
               <HiLightningBolt className="h-4 w-4" />
-              <span>Launch presentation flow</span>
+              <span>Open decision summary</span>
             </Link>
           </div>
         </div>
@@ -80,9 +79,6 @@ const Footer = () => {
         <div className="mt-10 flex flex-col gap-4 border-t border-white/5 pt-6 text-sm text-dark-500 md:flex-row md:items-center md:justify-between">
           <p>Built for tomorrow's room, but structured like a real product.</p>
           <div className="flex gap-5">
-            <Link to="/about" className="transition-colors hover:text-dark-300">
-              About
-            </Link>
             <Link to="/summary" className="transition-colors hover:text-dark-300">
               Summary
             </Link>

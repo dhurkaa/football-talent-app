@@ -164,8 +164,8 @@ const Home = () => {
                 <Link to={isAuthenticated ? "/players" : "/register"} className="btn-primary px-8 py-4">
                   {isAuthenticated ? "Open Players" : "Create Free Account"}
                 </Link>
-                <Link to="/about" className="btn-outline px-8 py-4">
-                  Learn More
+                <Link to="/summary" className="btn-outline px-8 py-4">
+                  Explore Summary
                 </Link>
               </div>
             </div>

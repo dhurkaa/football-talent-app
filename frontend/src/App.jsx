@@ -17,9 +17,7 @@ import Clubs from "./pages/clubs";
 import Reports from "./pages/reports";
 import Summary from "./pages/summary";
 import Shortlist from "./pages/shortlist";
-import Presentation from "./pages/presentation";
 import WarRoom from "./pages/warRoom";
-import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import AILab from "./pages/aiLab";
 
@@ -86,7 +84,6 @@ function App() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/summary" element={<Summary />} />
           <Route path="/shortlist" element={<Shortlist />} />
-          <Route path="/presentation" element={<Presentation />} />
           <Route path="/war-room" element={<WarRoom />} />
           <Route path="/ai-lab" element={<AILab />} />
           <Route
@@ -106,8 +103,6 @@ function App() {
             }
           />
           <Route path="/matches" element={<Matches />} />
-          <Route
-            path="/about" element={<About />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

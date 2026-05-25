@@ -7,7 +7,7 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const isAuthPage = ["/login", "/register"].includes(location.pathname);
   const showSidebar = !isAuthPage;
-  const hideFooter = showSidebar && !["/", "/about"].includes(location.pathname);
+  const hideFooter = showSidebar && location.pathname !== "/";
 
   return (
     <div className="min-h-screen bg-dark-950">

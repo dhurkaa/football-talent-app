@@ -9,7 +9,6 @@ import {
   HiLightningBolt,
   HiLogout,
   HiMenu,
-  HiPresentationChartBar,
   HiSearch,
   HiSparkles,
   HiTemplate,
@@ -44,7 +43,6 @@ const workspacePrimaryLinks = [
 const workspaceSecondaryLinks = [
   { path: "/clubs", label: "Clubs", icon: HiOfficeBuilding },
   { path: "/shortlist", label: "Shortlist", icon: HiTemplate },
-  { path: "/presentation", label: "Presentation", icon: HiPresentationChartBar },
   { path: "/war-room", label: "War Room", icon: HiLightningBolt },
   { path: "/summary", label: "Summary", icon: HiClipboardList }
 ];
